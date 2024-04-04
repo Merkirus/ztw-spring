@@ -6,16 +6,16 @@ import pl.edu.pwr.ztw.books.Books.Book;
 import pl.edu.pwr.ztw.books.Rental.Rental;
 import pl.edu.pwr.ztw.books.User.User;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.time.LocalDate;
+import java.util.*;
 
 @Service
 public class DatabaseService implements IDatabaseService {
     private static List<Author> authorsRepo = new ArrayList<>();
     private static List<Book> booksRepo = new ArrayList<>();
     private static List<Rental> rentalRepo = new ArrayList<>();
+
+    private static List<User> usersRepo = new ArrayList<>();
 
     static {
         authorsRepo.add(new Author(1, "Henryk", "Sienkiewicz"));
@@ -24,6 +24,12 @@ public class DatabaseService implements IDatabaseService {
         booksRepo.add(new Book(1, "Potop", authorsRepo.stream().filter(a -> Objects.equals(a.getSurname(), "Sienkiewicz")).findAny().orElse(null), 936));
         booksRepo.add(new Book(2, "Wesele", authorsRepo.stream().filter(a -> Objects.equals(a.getSurname(), "Reymont")).findAny().orElse(null), 150));
         booksRepo.add(new Book(3, "Dziady", authorsRepo.stream().filter(a -> Objects.equals(a.getSurname(), "Mickiewicz")).findAny().orElse(null), 292));
+        usersRepo.add(new User(1, "Adam"));
+        usersRepo.add(new User(2, "Magda"));
+        usersRepo.add(new User(3, "Tadeusz"));
+        rentalRepo.add(new Rental(1, booksRepo.get(0), usersRepo.get(0), LocalDate.of(2024, 4, 3), false));
+        rentalRepo.add(new Rental(2, booksRepo.get(1), usersRepo.get(1), LocalDate.of(2024, 3, 21), false));
+        rentalRepo.add(new Rental(3, booksRepo.get(2), usersRepo.get(2), LocalDate.of(2024, 3, 11), true));
     }
 
     @Override
@@ -42,12 +48,21 @@ public class DatabaseService implements IDatabaseService {
 
     @Override
     public void addRental(Rental rental) {
+        Book _book = rental.getBook();
+        if (_book != null && !booksRepo.contains(_book)) {
+            booksRepo.add(_book);
+        }
+        User _user = rental.getUser();
+        if (_user != null && !usersRepo.contains(_user)) {
+            usersRepo.add(_user);
+        }
 
+        rentalRepo.add(rental);
     }
 
     @Override
     public void addUser(User user) {
-
+        usersRepo.add(user);
     }
 
     @Override
@@ -62,12 +77,12 @@ public class DatabaseService implements IDatabaseService {
 
     @Override
     public Collection<Rental> getRentals() {
-        return null;
+        return rentalRepo;
     }
 
     @Override
     public Collection<User> getUsers() {
-        return null;
+        return usersRepo;
     }
 
     @Override
@@ -75,7 +90,7 @@ public class DatabaseService implements IDatabaseService {
         int index = authorsRepo.indexOf(authorsRepo.stream()
                 .filter(a -> a.getId() == id)
                 .findAny()
-                .orElse(null));
+                .orElseThrow(() -> new NoSuchElementException("Author with id = " + id + " not found")));
         if (index != -1)
             authorsRepo.set(index, author);
     }
@@ -85,19 +100,29 @@ public class DatabaseService implements IDatabaseService {
         int index = booksRepo.indexOf(booksRepo.stream()
                 .filter(b -> b.getId() == id)
                 .findAny()
-                .orElse(null));
+                .orElseThrow(() -> new NoSuchElementException("Book with id = " + id + " not found")));
         if (index != -1)
             booksRepo.set(index, book);
     }
 
     @Override
     public void updateRental(int id, Rental rental) {
-
+        int index = rentalRepo.indexOf(rentalRepo.stream()
+                .filter(b -> b.getId() == id)
+                .findAny()
+                .orElseThrow(() -> new NoSuchElementException("Rental with id = " + id + " not found")));
+        if (index != -1)
+            rentalRepo.set(index, rental);
     }
 
     @Override
     public void updateUser(int id, User user) {
-
+        int index = usersRepo.indexOf(usersRepo.stream()
+                .filter(b -> b.getId() == id)
+                .findAny()
+                .orElseThrow(() -> new NoSuchElementException("User with id = " + id + " not found")));
+        if (index != -1)
+            usersRepo.set(index, user);
     }
 
     @Override
@@ -113,15 +138,25 @@ public class DatabaseService implements IDatabaseService {
     @Override
     public void deleteBook(int id) {
         booksRepo.removeIf(b -> b.getId() == id);
+        rentalRepo.forEach(b -> {
+            if(b.getId() == id) {
+                b.setBook(null);
+            }
+        });
     }
 
     @Override
     public void deleteRental(int id) {
-
+        rentalRepo.removeIf(b -> b.getId() == id);
     }
 
     @Override
     public void deleteUser(int id) {
-
+        usersRepo.removeIf(b -> b.getId() == id);
+        rentalRepo.forEach(b -> {
+            if(b.getId() == id) {
+                b.setUser(null);
+            }
+        });
     }
 }

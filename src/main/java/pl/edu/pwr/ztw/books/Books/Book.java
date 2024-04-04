@@ -2,6 +2,8 @@ package pl.edu.pwr.ztw.books.Books;
 
 import pl.edu.pwr.ztw.books.Author.Author;
 
+import java.util.Objects;
+
 public class Book {
     private int id;
     private String title;
@@ -45,5 +47,18 @@ public class Book {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Book book = (Book) o;
+        return id == book.id && pages == book.pages && Objects.equals(title, book.title) && Objects.equals(author, book.author);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, title, author, pages);
     }
 }

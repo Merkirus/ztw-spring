@@ -1,19 +1,19 @@
 package pl.edu.pwr.ztw.books.Books;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import pl.edu.pwr.ztw.books.Author.Author;
-import pl.edu.pwr.ztw.books.Author.IAuthorService;
 import pl.edu.pwr.ztw.books.Database.IDatabaseService;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class BooksService implements IBooksService {
-    @Autowired
-    IDatabaseService dbService;
+    //@Autowired
+    private final IDatabaseService dbService;
+
+    public BooksService(IDatabaseService dbService) {
+        this.dbService = dbService;
+    }
 
     @Override
     public Collection<Book> getBooks() {
@@ -25,7 +25,7 @@ public class BooksService implements IBooksService {
         return dbService.getBooks().stream()
                 .filter(b -> b.getId() == id)
                 .findAny()
-                .orElse(null);
+                .orElseThrow(() -> new NoSuchElementException("Book with id = " + id + " not found"));
     }
 
     @Override

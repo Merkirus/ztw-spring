@@ -1,17 +1,19 @@
 package pl.edu.pwr.ztw.books.Author;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.edu.pwr.ztw.books.Database.IDatabaseService;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class AuthorService implements IAuthorService {
-    @Autowired
-    IDatabaseService dbService;
+    //@Autowired
+    private final IDatabaseService dbService;
+
+    public AuthorService(IDatabaseService dbService) {
+        this.dbService = dbService;
+    }
 
     @Override
     public Collection<Author> getAuthors() {
@@ -23,7 +25,7 @@ public class AuthorService implements IAuthorService {
         return dbService.getAuthors().stream()
                 .filter(a -> a.getId() == id)
                 .findAny()
-                .orElse(null);
+                .orElseThrow(() -> new NoSuchElementException("Author with id = " + id + " not found"));
     }
 
     @Override
