@@ -12,6 +12,22 @@ public class Rental {
     private LocalDate date;
     private boolean isReturned;
 
+    public boolean isReturned() {
+        return isReturned;
+    }
+
+    public void setReturned(boolean returned) {
+        isReturned = returned;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
     public int getId() {
         return id;
     }
