@@ -1,19 +1,17 @@
 package pl.edu.pwr.ztw.books.Books;
 
-import pl.edu.pwr.ztw.books.Author.Author;
-
 import java.util.Objects;
 
 public class Book {
     private int id;
     private String title;
-    private Author author;
+    private Integer authorId;
     int pages;
 
-    public Book(int id, String title, Author author, int pages) {
+    public Book(int id, String title, Integer authorId, int pages) {
         this.id = id;
         this.title = title;
-        this.author = author;
+        this.authorId = authorId;
         this.pages = pages;
     }
 
@@ -33,12 +31,12 @@ public class Book {
         this.pages = pages;
     }
 
-    public Author getAuthor() {
-        return author;
+    public Integer getAuthorId() {
+        return authorId;
     }
 
-    public void setAuthor(Author author) {
-        this.author = author;
+    public void setAuthorId(Integer author_id) {
+        this.authorId = author_id;
     }
 
     public String getTitle() {
@@ -54,11 +52,11 @@ public class Book {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Book book = (Book) o;
-        return id == book.id && pages == book.pages && Objects.equals(title, book.title) && Objects.equals(author, book.author);
+        return id == book.id && pages == book.pages && Objects.equals(title, book.title) && Objects.equals(authorId, book.authorId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, author, pages);
+        return Objects.hash(id, title, authorId, pages);
     }
 }

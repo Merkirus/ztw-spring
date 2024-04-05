@@ -1,14 +1,11 @@
 package pl.edu.pwr.ztw.books.Rental;
 
-import pl.edu.pwr.ztw.books.Books.Book;
-import pl.edu.pwr.ztw.books.User.User;
-
 import java.time.LocalDate;
 
 public class Rental {
     private int id;
-    private Book book;
-    private User user;
+    private Integer book_id;
+    private Integer user_id;
     private LocalDate date;
     private boolean isReturned;
 
@@ -36,28 +33,28 @@ public class Rental {
         this.id = id;
     }
 
-    public Book getBook() {
-        return book;
+    public Integer getBookId() {
+        return book_id;
     }
 
-    public void setBook(Book book) {
-        this.book = book;
+    public void setBookId(Integer book_id) {
+        this.book_id = book_id;
     }
 
-    public User getUser() {
-        return user;
+    public Integer getUserId() {
+        return user_id;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUserId(Integer user_id) {
+        this.user_id = user_id;
     }
 
 
 
-    public Rental(int id, Book book, User user, LocalDate date, boolean isReturned) {
+    public Rental(int id, Integer book_id, Integer user_id, LocalDate date, boolean isReturned) {
         this.id = id;
-        this.book = book;
-        this.user = user;
+        this.book_id = book_id;
+        this.user_id = user_id;
         this.date = date;
         this.isReturned = isReturned;
     }

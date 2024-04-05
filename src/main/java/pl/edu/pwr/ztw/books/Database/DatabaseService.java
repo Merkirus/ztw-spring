@@ -21,15 +21,15 @@ public class DatabaseService implements IDatabaseService {
         authorsRepo.add(new Author(1, "Henryk", "Sienkiewicz"));
         authorsRepo.add(new Author(2, "Stanisław", "Reymont"));
         authorsRepo.add(new Author(3, "Adam", "Mickiewicz"));
-        booksRepo.add(new Book(1, "Potop", authorsRepo.stream().filter(a -> Objects.equals(a.getSurname(), "Sienkiewicz")).findAny().orElse(null), 936));
-        booksRepo.add(new Book(2, "Wesele", authorsRepo.stream().filter(a -> Objects.equals(a.getSurname(), "Reymont")).findAny().orElse(null), 150));
-        booksRepo.add(new Book(3, "Dziady", authorsRepo.stream().filter(a -> Objects.equals(a.getSurname(), "Mickiewicz")).findAny().orElse(null), 292));
+        booksRepo.add(new Book(1, "Potop", 1, 936));
+        booksRepo.add(new Book(2, "Wesele", 2, 150));
+        booksRepo.add(new Book(3, "Dziady", 3, 292));
         usersRepo.add(new User(1, "Adam"));
         usersRepo.add(new User(2, "Magda"));
         usersRepo.add(new User(3, "Tadeusz"));
-        rentalRepo.add(new Rental(1, booksRepo.get(0), usersRepo.get(0), LocalDate.of(2024, 4, 3), false));
-        rentalRepo.add(new Rental(2, booksRepo.get(1), usersRepo.get(1), LocalDate.of(2024, 3, 21), false));
-        rentalRepo.add(new Rental(3, booksRepo.get(2), usersRepo.get(2), LocalDate.of(2024, 3, 11), true));
+        rentalRepo.add(new Rental(1, 0, 0, LocalDate.of(2024, 4, 3), false));
+        rentalRepo.add(new Rental(2, 1, 1, LocalDate.of(2024, 3, 21), false));
+        rentalRepo.add(new Rental(3, 2, 2, LocalDate.of(2024, 3, 11), true));
     }
 
     @Override
@@ -39,24 +39,23 @@ public class DatabaseService implements IDatabaseService {
 
     @Override
     public void addBook(Book book) {
-        Author _author = book.getAuthor();
-        if (_author != null && !authorsRepo.contains(_author)) {
-            authorsRepo.add(_author);
+        Integer _author = book.getAuthorId();
+        if (_author != null) {
+            checkAuthor(_author); // throws error
         }
         booksRepo.add(book);
     }
 
     @Override
     public void addRental(Rental rental) {
-        Book _book = rental.getBook();
-        if (_book != null && !booksRepo.contains(_book)) {
-            booksRepo.add(_book);
+        Integer _book = rental.getBookId();
+        if (_book != null) {
+            checkBook(_book);
         }
-        User _user = rental.getUser();
-        if (_user != null && !usersRepo.contains(_user)) {
-            usersRepo.add(_user);
+        Integer _user = rental.getUserId();
+        if (_user != null) {
+            checkUser(_user);
         }
-
         rentalRepo.add(rental);
     }
 
@@ -87,76 +86,108 @@ public class DatabaseService implements IDatabaseService {
 
     @Override
     public void updateAuthor(int id, Author author) {
-        int index = authorsRepo.indexOf(authorsRepo.stream()
-                .filter(a -> a.getId() == id)
-                .findAny()
-                .orElseThrow(() -> new NoSuchElementException("Author with id = " + id + " not found")));
+        int index = authorsRepo.indexOf(checkAuthor(id));
         if (index != -1)
             authorsRepo.set(index, author);
     }
 
     @Override
     public void updateBook(int id, Book book) {
-        int index = booksRepo.indexOf(booksRepo.stream()
-                .filter(b -> b.getId() == id)
-                .findAny()
-                .orElseThrow(() -> new NoSuchElementException("Book with id = " + id + " not found")));
+        int index = booksRepo.indexOf(checkBook(id));
+        Integer _author = book.getAuthorId();
+        if (_author != null) {
+            checkAuthor(_author);
+        }
         if (index != -1)
             booksRepo.set(index, book);
     }
 
     @Override
     public void updateRental(int id, Rental rental) {
-        int index = rentalRepo.indexOf(rentalRepo.stream()
-                .filter(b -> b.getId() == id)
-                .findAny()
-                .orElseThrow(() -> new NoSuchElementException("Rental with id = " + id + " not found")));
+        int index = rentalRepo.indexOf(checkRental(id));
+        Integer _book = rental.getBookId();
+        if (_book != null) {
+            checkBook(_book);
+        }
+        Integer _user = rental.getUserId();
+        if (_user != null) {
+            checkUser(_user);
+        }
         if (index != -1)
             rentalRepo.set(index, rental);
     }
 
     @Override
     public void updateUser(int id, User user) {
-        int index = usersRepo.indexOf(usersRepo.stream()
-                .filter(b -> b.getId() == id)
-                .findAny()
-                .orElseThrow(() -> new NoSuchElementException("User with id = " + id + " not found")));
+        int index = usersRepo.indexOf(checkUser(id));
         if (index != -1)
             usersRepo.set(index, user);
     }
 
     @Override
     public void deleteAuthor(int id) {
+        checkAuthor(id);
         authorsRepo.removeIf(a -> a.getId() == id);
         booksRepo.forEach(b -> {
             if(b.getId() == id) {
-                b.setAuthor(null);
+                b.setAuthorId(null);
             }
         });
     }
 
     @Override
     public void deleteBook(int id) {
+        checkBook(id);
         booksRepo.removeIf(b -> b.getId() == id);
         rentalRepo.forEach(b -> {
             if(b.getId() == id) {
-                b.setBook(null);
+                b.setBookId(null);
             }
         });
     }
 
     @Override
     public void deleteRental(int id) {
+        checkRental(id);
         rentalRepo.removeIf(b -> b.getId() == id);
     }
 
     @Override
     public void deleteUser(int id) {
+        checkUser(id);
         usersRepo.removeIf(b -> b.getId() == id);
         rentalRepo.forEach(b -> {
             if(b.getId() == id) {
-                b.setUser(null);
+                b.setUserId(null);
             }
         });
+    }
+
+    public Author checkAuthor(int id) {
+        return authorsRepo.stream()
+                .filter(a -> a.getId() == id)
+                .findAny()
+                .orElseThrow(() -> new NoSuchElementException("Author with id = " + id + " not found"));
+    }
+
+    public Book checkBook(int id) {
+        return booksRepo.stream()
+                .filter(a -> a.getId() == id)
+                .findAny()
+                .orElseThrow(() -> new NoSuchElementException("Book with id = " + id + " not found"));
+    }
+
+    public Rental checkRental(int id) {
+        return rentalRepo.stream()
+                .filter(a -> a.getId() == id)
+                .findAny()
+                .orElseThrow(() -> new NoSuchElementException("Rental with id = " + id + " not found"));
+    }
+
+    public User checkUser(int id) {
+        return usersRepo.stream()
+                .filter(a -> a.getId() == id)
+                .findAny()
+                .orElseThrow(() -> new NoSuchElementException("User with id = " + id + " not found"));
     }
 }
